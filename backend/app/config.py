@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
 
     # CORS
-    cors_origins: str = "http://localhost:5173,http://localhost:3000,https://brilliant-kleicha-6387ac.netlify.app,*"
+    cors_origins: str = "http://localhost:5173,http://localhost:3000,https://brilliant-kleicha-6387ac.netlify.app,https://frabjous-torrone-109e9f.netlify.app,*"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
