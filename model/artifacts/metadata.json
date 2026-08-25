@@ -1,0 +1,37 @@
+{
+  "model_version": "2026-08-25T13:23:04",
+  "training_data_size": 400,
+  "train_size": 320,
+  "test_size": 80,
+  "validation_accuracy": 0.55,
+  "validation_auc": 0.5903,
+  "feature_importances": {
+    "priority": 0.06355106128973545,
+    "urgency_score": 0.2428579874354313,
+    "energy_required_ord": 0.026688027919929056,
+    "estimated_minutes": 0.04414905987226631,
+    "current_energy": 0.10524909832475215,
+    "available_minutes": 0.03523664505967352,
+    "hour_of_day": 0.0987185795753377,
+    "day_of_week": 0.04516412074897147,
+    "task_age_hours": 0.20017296635284262,
+    "energy_match": 0.03029463777610558,
+    "effort_ratio": 0.10791781564495499
+  },
+  "feature_columns": [
+    "priority",
+    "urgency_score",
+    "energy_required_ord",
+    "estimated_minutes",
+    "current_energy",
+    "available_minutes",
+    "hour_of_day",
+    "day_of_week",
+    "task_age_hours",
+    "energy_match",
+    "effort_ratio"
+  ],
+  "last_trained": "2026-08-25T13:23:04",
+  "completion_rate_train": 0.425,
+  "completion_rate_test": 0.45
+}
