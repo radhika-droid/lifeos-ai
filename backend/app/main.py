@@ -39,18 +39,27 @@ async def health_check():
 @app.get("/debug-db")
 async def debug_db():
     try:
-        from sqlalchemy import text
+        from app.services.auth_service import hash_password
+        from app.models.user import User
+        from sqlalchemy import select
         from app.db import async_session
         import sys
         import greenlet
+        import bcrypt
+
+        hashed = hash_password("testpassword123")
+        
         async with async_session() as session:
-            res = await session.execute(text("SELECT 1"))
-            val = res.scalar()
+            # Check if table exists by doing a simple select
+            res = await session.execute(select(User).limit(1))
+            val = res.scalar_one_or_none()
+            
         return {
             "status": "success",
-            "val": val,
+            "hashed_prefix": hashed[:10],
+            "table_ok": True,
             "python_version": sys.version,
-            "greenlet_version": getattr(greenlet, "__version__", "unknown")
+            "bcrypt_version": getattr(bcrypt, "__version__", "unknown")
         }
     except Exception as e:
         import traceback
@@ -60,6 +69,7 @@ async def debug_db():
             "traceback": traceback.format_exc(),
             "python_version": sys.version,
         }
+
 
 
 
