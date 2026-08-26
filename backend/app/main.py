@@ -84,3 +84,29 @@ app.include_router(checkin.router, prefix="/checkin", tags=["checkin"])
 app.include_router(recommend.router, prefix="/recommend", tags=["recommend"])
 app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+
+# --- Serve Frontend (Monolith) ---
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# Assuming running from backend/ directory inside docker: /app/backend/app/main.py
+# The frontend dist is copied to /app/frontend/dist
+dist_dir = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
+
+if os.path.isdir(dist_dir):
+    app.mount("/assets", StaticFiles(directory=os.path.join(dist_dir, "assets")), name="assets")
+    
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        path = os.path.join(dist_dir, full_path)
+        if os.path.isfile(path):
+            return FileResponse(path)
+        
+        # SPA routing: return index.html for all non-file paths
+        index_path = os.path.join(dist_dir, "index.html")
+        if os.path.isfile(index_path):
+            return FileResponse(index_path)
+        
+        return {"detail": "Not Found"}
+
