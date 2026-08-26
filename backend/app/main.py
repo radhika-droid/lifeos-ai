@@ -110,3 +110,18 @@ if os.path.isdir(dist_dir):
         
         return {"detail": "Not Found"}
 
+@app.get("/debug-path")
+async def debug_path():
+    import os
+    abs_dist_dir = os.path.abspath(dist_dir)
+    return {
+        "file": __file__,
+        "dirname": os.path.dirname(__file__),
+        "dist_dir": dist_dir,
+        "abs_dist_dir": abs_dist_dir,
+        "is_dir": os.path.isdir(dist_dir),
+        "is_abs_dir": os.path.isdir(abs_dist_dir),
+        "cwd": os.getcwd(),
+        "files": os.listdir(abs_dist_dir) if os.path.isdir(abs_dist_dir) else "missing"
+    }
+
