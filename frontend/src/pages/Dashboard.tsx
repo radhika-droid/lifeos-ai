@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../lib/store';
 import api from '../lib/api';
@@ -212,32 +212,47 @@ export default function Dashboard() {
         </div>
       )}
       {!tasksLoading && !recsLoading && recommendations && recommendations.length > 0 && (
-        <div className="glass-card p-6 gradient-border">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">🤖</span>
-            <h2 className="text-lg font-semibold text-text-primary">AI Recommendations</h2>
-            <Badge variant="info">Smart Pick</Badge>
+        <div className="glass-card p-6 gradient-border animate-pulse-glow relative overflow-hidden">
+          {/* Subtle background glow for the whole AI section */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent-glow rounded-full blur-3xl opacity-50 pointer-events-none" />
+          
+          <div className="flex items-center gap-3 mb-6 relative z-10">
+            <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-xl shadow-lg shadow-accent/40 animate-pulse">
+              🧠
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary">
+                AI Intelligence
+              </h2>
+              <p className="text-xs text-text-muted">Learning from your habits...</p>
+            </div>
+            <div className="ml-auto">
+              <Badge variant="info">Live Model</Badge>
+            </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4 relative z-10">
             {recommendations.map((task, i) => (
               <div
                 key={task.id}
-                className="flex items-start gap-4 p-4 rounded-xl bg-white/[0.02] border border-border-default hover:border-border-glow transition-all"
+                className="flex items-start gap-4 p-4 rounded-xl bg-bg-secondary/50 border border-border-default hover:border-accent/50 hover:bg-accent/5 hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-lg shadow-accent/20">
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="text-sm font-semibold text-text-primary">{task.title}</span>
                     <Badge variant="priority" priority={task.priority}>P{task.priority}</Badge>
                     <StatusBadge status={task.status} />
                   </div>
-                  <p className="text-xs text-text-muted mt-1">{task.reason}</p>
+                  <p className="text-xs text-accent-secondary mt-1 font-medium flex gap-2">
+                    <span>✨</span>
+                    <TypewriterEffect text={task.reason} delay={i * 500} />
+                  </p>
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="text-lg font-bold gradient-text">{task.score}</div>
-                  <div className="text-xs text-text-muted">score</div>
+                <div className="text-right shrink-0 bg-bg-primary/50 px-3 py-1 rounded-lg border border-border-default">
+                  <div className="text-lg font-bold gradient-text">{Math.round(task.score * 100)}%</div>
+                  <div className="text-[10px] uppercase tracking-wider text-text-muted font-semibold">Match</div>
                 </div>
               </div>
             ))}
@@ -286,4 +301,29 @@ function StatCard({ icon, label, value, color }: { icon: string; label: string; 
       </div>
     </div>
   );
+}
+
+function TypewriterEffect({ text, delay = 0 }: { text: string; delay?: number }) {
+  const [displayed, setDisplayed] = useState('');
+  
+  useEffect(() => {
+    let i = 0;
+    setDisplayed('');
+    
+    const startTimeout = setTimeout(() => {
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          setDisplayed((prev) => prev + text.charAt(i));
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, 30);
+      return () => clearInterval(timer);
+    }, delay);
+    
+    return () => clearTimeout(startTimeout);
+  }, [text, delay]);
+  
+  return <span>{displayed}</span>;
 }
