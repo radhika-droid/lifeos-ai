@@ -36,6 +36,33 @@ async def health_check():
     return {"status": "ok", "app": settings.app_name}
 
 
+@app.get("/debug-db")
+async def debug_db():
+    try:
+        from sqlalchemy import text
+        from app.db import async_session
+        import sys
+        import greenlet
+        async with async_session() as session:
+            res = await session.execute(text("SELECT 1"))
+            val = res.scalar()
+        return {
+            "status": "success",
+            "val": val,
+            "python_version": sys.version,
+            "greenlet_version": getattr(greenlet, "__version__", "unknown")
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "python_version": sys.version,
+        }
+
+
+
 # Import and include routers after app is created
 from app.routers import auth, tasks, habits, goals, checkin, recommend, analytics, notifications  # noqa: E402
 
