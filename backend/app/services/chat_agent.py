@@ -254,74 +254,22 @@ async def chat(user_id: int, messages: list[dict]) -> str:
     if not settings.gemini_api_key:
         return "⚠️ The Gemini API key is not configured. Please add `GEMINI_API_KEY=your_key` to your `.env` file and restart the server."
 
-    client = genai.Client(api_key=settings.gemini_api_key)
+    try:
+        client = genai.Client(api_key=settings.gemini_api_key)
 
-    # Build Gemini-compatible contents
-    contents = []
-    for msg in messages:
-        contents.append(
-            types.Content(
-                role=msg["role"],
-                parts=[types.Part.from_text(text=msg["text"])],
-            )
-        )
-
-    # Call Gemini with tool declarations
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            tools=TOOLS,
-            temperature=0.7,
-        ),
-    )
-
-    # Handle tool calls in a loop (Gemini may chain multiple tool calls)
-    max_iterations = 5
-    iteration = 0
-
-    while response.candidates and iteration < max_iterations:
-        candidate = response.candidates[0]
-        has_function_call = False
-
-        for part in candidate.content.parts:
-            if part.function_call:
-                has_function_call = True
-                fn_name = part.function_call.name
-                fn_args = dict(part.function_call.args) if part.function_call.args else {}
-
-                # Inject user_id into all tool calls for security
-                fn_args["user_id"] = user_id
-
-                handler = TOOL_HANDLERS.get(fn_name)
-                if handler:
-                    try:
-                        result = await handler(**fn_args)
-                    except Exception as e:
-                        result = {"error": str(e)}
-                else:
-                    result = {"error": f"Unknown tool: {fn_name}"}
-
-                # Add assistant's function call + our function response to contents
-                contents.append(candidate.content)
-                contents.append(
-                    types.Content(
-                        role="user",
-                        parts=[types.Part.from_function_response(
-                            name=fn_name,
-                            response={"result": result},
-                        )],
-                    )
+        # Build Gemini-compatible contents
+        contents = []
+        for msg in messages:
+            contents.append(
+                types.Content(
+                    role=msg["role"],
+                    parts=[types.Part.from_text(text=msg["text"])],
                 )
-                break  # Process one function call at a time
+            )
 
-        if not has_function_call:
-            break
-
-        # Call Gemini again with the tool results
+        # Call Gemini with tool declarations
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.6-flash",
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
@@ -329,13 +277,69 @@ async def chat(user_id: int, messages: list[dict]) -> str:
                 temperature=0.7,
             ),
         )
-        iteration += 1
 
-    # Extract the final text response
-    if response.candidates:
-        parts = response.candidates[0].content.parts
-        text_parts = [p.text for p in parts if p.text]
-        if text_parts:
-            return "\n".join(text_parts)
+        # Handle tool calls in a loop (Gemini may chain multiple tool calls)
+        max_iterations = 5
+        iteration = 0
 
-    return "I'm sorry, I couldn't generate a response. Please try again."
+        while response.candidates and iteration < max_iterations:
+            candidate = response.candidates[0]
+            has_function_call = False
+
+            for part in candidate.content.parts:
+                if part.function_call:
+                    has_function_call = True
+                    fn_name = part.function_call.name
+                    fn_args = dict(part.function_call.args) if part.function_call.args else {}
+
+                    # Inject user_id into all tool calls for security
+                    fn_args["user_id"] = user_id
+
+                    handler = TOOL_HANDLERS.get(fn_name)
+                    if handler:
+                        try:
+                            result = await handler(**fn_args)
+                        except Exception as e:
+                            result = {"error": str(e)}
+                    else:
+                        result = {"error": f"Unknown tool: {fn_name}"}
+
+                    # Add assistant's function call + our function response to contents
+                    contents.append(candidate.content)
+                    contents.append(
+                        types.Content(
+                            role="user",
+                            parts=[types.Part.from_function_response(
+                                name=fn_name,
+                                response={"result": result},
+                            )],
+                        )
+                    )
+                    break  # Process one function call at a time
+
+            if not has_function_call:
+                break
+
+            # Call Gemini again with the tool results
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    tools=TOOLS,
+                    temperature=0.7,
+                ),
+            )
+            iteration += 1
+
+        # Extract the final text response
+        if response.candidates:
+            parts = response.candidates[0].content.parts
+            text_parts = [p.text for p in parts if p.text]
+            if text_parts:
+                return "\n".join(text_parts)
+
+        return "I'm sorry, I couldn't generate a response. Please try again."
+    except Exception as e:
+        print(f"Chat error: {e}")
+        return "I'm having a little trouble connecting to the AI service right now. Please try again in a few moments!"
