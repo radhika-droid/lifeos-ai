@@ -11,12 +11,13 @@ router = APIRouter()
 
 @router.post("/signup", response_model=TokenResponse)
 async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
+    email = req.email.strip().lower()
     # Check existing
-    result = await db.execute(select(User).where(User.email == req.email))
+    result = await db.execute(select(User).where(User.email == email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = User(email=req.email, hashed_password=hash_password(req.password), name=req.name)
+    user = User(email=email, hashed_password=hash_password(req.password), name=req.name.strip())
     db.add(user)
     await db.commit()
     await db.refresh(user)
@@ -27,7 +28,8 @@ async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == req.email))
+    email = req.email.strip().lower()
+    result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
     if not user or not verify_password(req.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")

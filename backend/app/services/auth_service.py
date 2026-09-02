@@ -21,9 +21,12 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    pwd_bytes = plain.encode("utf-8")
-    hashed_bytes = hashed.encode("utf-8")
-    return bcrypt.checkpw(pwd_bytes, hashed_bytes)
+    try:
+        pwd_bytes = plain.encode("utf-8")
+        hashed_bytes = hashed.encode("utf-8")
+        return bcrypt.checkpw(pwd_bytes, hashed_bytes)
+    except Exception:
+        return False
 
 
 def create_access_token(user_id: int) -> str:

@@ -13,7 +13,16 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await login({ email, password });
+      await login({ email: email.trim(), password });
+      navigate('/');
+    } catch {
+      // error is set in store
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    try {
+      await login({ email: 'demo@lifeos.ai', password: 'password123' });
       navigate('/');
     } catch {
       // error is set in store
@@ -71,6 +80,22 @@ export default function Login() {
 
           <Button type="submit" loading={isLoading} className="w-full" size="lg">
             Sign In
+          </Button>
+
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-border-default"></div>
+            <span className="flex-shrink mx-3 text-xs text-text-muted">OR</span>
+            <div className="flex-grow border-t border-border-default"></div>
+          </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full border border-border-default hover:border-accent/40 text-accent font-medium py-2.5"
+            onClick={handleDemoLogin}
+            disabled={isLoading}
+          >
+            ⚡ Instant Demo Login
           </Button>
         </form>
 

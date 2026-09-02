@@ -14,7 +14,7 @@ export default function Signup() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await signup({ name, email, password });
+      await signup({ name: name.trim(), email: email.trim(), password });
       navigate('/');
     } catch {
       // error is set in store
