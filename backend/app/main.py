@@ -74,7 +74,7 @@ async def debug_db():
 
 
 # Import and include routers after app is created
-from app.routers import auth, tasks, habits, goals, checkin, recommend, analytics, notifications  # noqa: E402
+from app.routers import auth, tasks, habits, goals, checkin, recommend, analytics, notifications, chat  # noqa: E402
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
@@ -84,6 +84,7 @@ app.include_router(checkin.router, prefix="/checkin", tags=["checkin"])
 app.include_router(recommend.router, prefix="/recommend", tags=["recommend"])
 app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+app.include_router(chat.router, prefix="/chat", tags=["chat"])
 
 # --- Serve Frontend (Monolith) ---
 import os
