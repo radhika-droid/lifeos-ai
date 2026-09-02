@@ -1,5 +1,9 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_DB_PATH = BACKEND_DIR / "lifeos.db"
 
 
 class Settings(BaseSettings):
@@ -8,7 +12,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # Database
-    database_url: str = "sqlite+aiosqlite:///./lifeos.db"
+    database_url: str = f"sqlite+aiosqlite:///{DEFAULT_DB_PATH}"
 
     # JWT
     jwt_secret: str = "dev-secret-change-in-production"

@@ -61,17 +61,22 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   clearError: () => set({ error: null }),
 
-  hydrate: () => {
+  hydrate: async () => {
     const token = localStorage.getItem('lifeos_token');
-    const userStr = localStorage.getItem('lifeos_user');
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr) as User;
-        set({ user, token, isAuthenticated: true });
-      } catch {
-        localStorage.removeItem('lifeos_token');
-        localStorage.removeItem('lifeos_user');
-      }
+    if (!token) {
+      set({ user: null, token: null, isAuthenticated: false });
+      return;
+    }
+
+    try {
+      // Validate token with live backend
+      const res = await api.get<User>('/auth/me');
+      set({ user: res.data, token, isAuthenticated: true });
+    } catch {
+      // Token is expired, invalid, or user was deleted
+      localStorage.removeItem('lifeos_token');
+      localStorage.removeItem('lifeos_user');
+      set({ user: null, token: null, isAuthenticated: false });
     }
   },
 }));

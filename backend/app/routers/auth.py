@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.db import get_db
 from app.models.user import User
 from app.schemas.auth import SignupRequest, LoginRequest, TokenResponse, UserResponse
-from app.services.auth_service import hash_password, verify_password, create_access_token
+from app.services.auth_service import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter()
 
@@ -36,3 +36,9 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
 
     token = create_access_token(user.id)
     return TokenResponse(access_token=token, user=UserResponse.model_validate(user))
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_profile(user: User = Depends(get_current_user)):
+    return UserResponse.model_validate(user)
+

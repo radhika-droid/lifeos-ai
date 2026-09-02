@@ -5,7 +5,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 
 export default function Login() {
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, logout, user, isAuthenticated, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,6 +43,30 @@ export default function Login() {
           <h1 className="text-2xl font-bold gradient-text">Welcome back</h1>
           <p className="text-sm text-text-secondary mt-1">Sign in to your LifeOS dashboard</p>
         </div>
+
+        {/* Active Session Notice */}
+        {isAuthenticated && user && (
+          <div className="glass-card p-4 mb-4 border border-accent/30 flex flex-col gap-2 text-sm text-text-primary">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-text-secondary">Signed in as <strong className="text-text-primary">{user.email}</strong></span>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="text-xs text-danger hover:underline cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              className="w-full mt-1"
+              onClick={() => navigate('/')}
+            >
+              Continue to Dashboard →
+            </Button>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="glass-card p-6 space-y-4">
