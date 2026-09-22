@@ -12,6 +12,7 @@ from routes.habits import habits_bp
 from routes.wellness import wellness_bp
 from routes.notifications import notifications_bp
 from routes.uploads import uploads_bp
+from routes.auth import auth_bp
 
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
 
@@ -26,6 +27,8 @@ app.register_blueprint(habits_bp)
 app.register_blueprint(wellness_bp)
 app.register_blueprint(notifications_bp)
 app.register_blueprint(uploads_bp)
+app.register_blueprint(auth_bp)
+
 
 # Serve frontend SPA
 @app.route("/", defaults={"path": ""})
