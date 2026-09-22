@@ -71,3 +71,14 @@ class Notification(Base):
     source = Column(String, default="system")  # task | habit | system
     source_id = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, nullable=False, index=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    password_hash = Column(String, nullable=False)
+    bio = Column(Text, default="Your personal life advisor")
+    avatar = Column(String, default="🧑")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
