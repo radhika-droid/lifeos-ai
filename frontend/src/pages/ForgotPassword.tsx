@@ -14,7 +14,6 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [generatedToken, setGeneratedToken] = useState<string | null>(null);
 
   const handleRequestReset = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,9 +23,8 @@ export default function ForgotPassword() {
 
     try {
       const res = await api.post('/auth/forgot-password', { email: email.trim() });
-      setMessage(res.data.message);
+      setMessage(res.data.message || 'Password reset request processed.');
       if (res.data.reset_token) {
-        setGeneratedToken(res.data.reset_token);
         setToken(res.data.reset_token);
       }
       setStep('reset');
@@ -48,12 +46,12 @@ export default function ForgotPassword() {
         token: token.trim(),
         new_password: newPassword,
       });
-      setMessage(res.data.message || 'Password reset successfully!');
+      setMessage(res.data.message || 'Password reset successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to reset password. Please check your token.');
+      setError(err.response?.data?.detail || 'Failed to reset password. Please verify the reset code.');
     } finally {
       setLoading(false);
     }
@@ -71,12 +69,12 @@ export default function ForgotPassword() {
             🔐
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
-            Account Recovery
+            Reset Password
           </h1>
           <p className="text-sm text-zinc-400 mt-1">
             {step === 'request'
-              ? 'Enter your registered email to receive a recovery token'
-              : 'Enter the recovery token and choose your new password'}
+              ? 'Enter your registered email to receive your verification code'
+              : 'Enter your verification code and choose a new password'}
           </p>
         </div>
 
@@ -99,7 +97,7 @@ export default function ForgotPassword() {
           {step === 'request' ? (
             <form onSubmit={handleRequestReset} className="space-y-4">
               <Input
-                label="Registered Email Address"
+                label="Account Email Address"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
@@ -112,24 +110,15 @@ export default function ForgotPassword() {
               />
 
               <Button type="submit" loading={loading} className="w-full" size="lg">
-                Generate Recovery Token
+                Send Reset Code
               </Button>
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4">
-              {generatedToken && (
-                <div className="p-3.5 rounded-2xl bg-[#0f0f13] border border-indigo-500/30 text-xs space-y-1.5">
-                  <span className="text-zinc-400 font-medium block">🔑 Generated Recovery Token:</span>
-                  <code className="block bg-black/40 p-2.5 rounded-xl text-indigo-300 font-mono break-all text-[11px] border border-white/5">
-                    {generatedToken}
-                  </code>
-                </div>
-              )}
-
               <Input
-                label="Recovery Token"
+                label="Reset Code / Token"
                 type="text"
-                placeholder="Paste token here"
+                placeholder="Enter reset code"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 required
@@ -146,7 +135,7 @@ export default function ForgotPassword() {
               />
 
               <Button type="submit" loading={loading} className="w-full" size="lg">
-                Confirm & Reset Password
+                Save New Password
               </Button>
             </form>
           )}

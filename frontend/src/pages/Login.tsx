@@ -20,15 +20,6 @@ export default function Login() {
     }
   };
 
-  const handleDemoLogin = async () => {
-    try {
-      await login({ email: 'demo@lifeos.ai', password: 'password123' });
-      navigate('/');
-    } catch {
-      // error is set in store
-    }
-  };
-
   return (
     <div className="min-h-dvh flex items-center justify-center p-4 lg:p-8 bg-[#0f0f13] relative overflow-hidden">
       {/* Background ambient orbs */}
@@ -39,7 +30,6 @@ export default function Login() {
         
         {/* Left Side: Visual Showcase Card */}
         <div className="hidden lg:flex lg:col-span-6 flex-col justify-between p-8 rounded-3xl bg-gradient-to-br from-[#1b1b26]/90 via-[#161622]/80 to-[#12121a]/90 border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden min-h-[560px]">
-          {/* Decorative grid pattern */}
           <div className="absolute inset-0 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] opacity-15" />
           
           <div className="relative z-10">
@@ -56,7 +46,7 @@ export default function Login() {
               Your Intelligent Life & Decision Operating System
             </h2>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Experience an AI-driven personal assistant that predicts your highest-leverage tasks, manages habit loops, and maintains peak mental wellness.
+              Sign in to access your personal AI workspace, daily prioritization matrix, habit loops, and mental wellness tools.
             </p>
           </div>
 
@@ -68,7 +58,7 @@ export default function Login() {
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-white">Smart Decision Engine</h4>
-                <p className="text-xs text-zinc-400">Personalized ML scoring fine-tuned to your daily energy & habits</p>
+                <p className="text-xs text-zinc-400">ML scoring fine-tuned to your daily energy, mood, and tasks</p>
               </div>
             </div>
 
@@ -78,7 +68,7 @@ export default function Login() {
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-white">30-Day Habit Loops</h4>
-                <p className="text-xs text-zinc-400">Visual heatmaps and consistency tracking with streak protection</p>
+                <p className="text-xs text-zinc-400">Visual activity heatmaps and streak consistency tracking</p>
               </div>
             </div>
 
@@ -95,22 +85,22 @@ export default function Login() {
 
           <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs text-zinc-400 relative z-10">
             <span>🔒 Secure JWT Authentication</span>
-            <span>⚡ Zero-Lag SQLite Monolith</span>
+            <span>🛡️ Isolated User Workspaces</span>
           </div>
         </div>
 
         {/* Right Side: Sign In Form */}
         <div className="lg:col-span-6 w-full max-w-md mx-auto">
-          {/* Mobile Header */}
+          {/* Header */}
           <div className="text-center lg:text-left mb-6">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl mx-auto lg:mx-0 mb-4 shadow-lg shadow-indigo-500/30 lg:hidden">
               ⚡
             </div>
             <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
-              Welcome back
+              Sign In
             </h1>
             <p className="text-sm text-zinc-400 mt-1">
-              Sign in to manage your tasks, habits, and wellness
+              Enter your credentials to access your LifeOS dashboard
             </p>
           </div>
 
@@ -119,7 +109,7 @@ export default function Login() {
             <div className="p-4 mb-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex flex-col gap-2 text-sm text-zinc-200 backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-zinc-400">
-                  Signed in as <strong className="text-white">{user.email}</strong>
+                  Currently signed in as <strong className="text-white">{user.email}</strong>
                 </span>
                 <button
                   type="button"
@@ -151,9 +141,9 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                label="Email"
+                label="Email Address"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="name@example.com"
                 value={email}
                 onChange={(e) => {
                   clearError();
@@ -187,22 +177,6 @@ export default function Login() {
 
               <Button type="submit" loading={isLoading} className="w-full" size="lg">
                 Sign In
-              </Button>
-
-              <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-white/10"></div>
-                <span className="flex-shrink mx-3 text-xs text-zinc-400">OR QUICK TEST</span>
-                <div className="flex-grow border-t border-white/10"></div>
-              </div>
-
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-medium py-2.5 rounded-xl transition-all"
-                onClick={handleDemoLogin}
-                disabled={isLoading}
-              >
-                ⚡ 1-Click Instant Demo Login
               </Button>
             </form>
           </div>
