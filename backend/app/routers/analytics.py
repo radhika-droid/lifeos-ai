@@ -9,7 +9,13 @@ from app.models.user import User
 from app.models.interaction import Interaction
 from app.services.auth_service import get_current_user
 from app.services.decision_engine import _MODEL, _METADATA, reload_model
-from model.train_model import train as train_ml_model
+
+import sys
+from pathlib import Path
+# Ensure /app (project root) is on sys.path so `model.train_model` is importable
+_project_root = str(Path(__file__).resolve().parent.parent.parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 router = APIRouter()
 
@@ -59,6 +65,7 @@ async def trigger_train_model(
 ):
     """Train or fine-tune the decision engine ML model on user interaction data."""
     try:
+        from model.train_model import train as train_ml_model
         res = train_ml_model(min_samples=5, user_id=user.id)
         reload_model()
         return {

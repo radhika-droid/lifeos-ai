@@ -23,5 +23,6 @@ COPY model/ ./model/
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 ENV PORT=10000
+WORKDIR /app/backend
 CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"
 
