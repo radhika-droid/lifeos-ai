@@ -29,6 +29,21 @@ export interface SignupRequest {
   name: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  reset_token?: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string;
+}
+
+
 // ── Tasks ─────────────────────────────
 
 export type TaskStatus = 'pending' | 'in_progress' | 'done';

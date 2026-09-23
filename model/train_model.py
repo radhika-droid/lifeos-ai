@@ -45,7 +45,7 @@ FEATURE_COLUMNS = [
     "effort_ratio",          # derived: estimated / available
 ]
 
-MIN_SAMPLES_DEFAULT = 200
+MIN_SAMPLES_DEFAULT = 10
 
 # Human-readable names for feature importance explanations
 FEATURE_NAMES_HUMAN = {
@@ -63,10 +63,27 @@ FEATURE_NAMES_HUMAN = {
 }
 
 
-def load_interactions(db_path: str) -> list[dict]:
-    """Load interactions with outcomes from SQLite."""
+def load_interactions(db_path: str, user_id: int | None = None) -> list[dict]:
+    """Load interactions with outcomes from SQLite. Optionally filter by user_id."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+    if user_id is not None:
+        cursor = conn.execute(
+            """
+            SELECT priority, urgency_score, energy_required, estimated_minutes,
+                   current_energy, available_minutes, hour_of_day, day_of_week,
+                   task_age_hours, rule_score, outcome, created_at
+            FROM interactions
+            WHERE outcome IS NOT NULL AND user_id = ?
+            ORDER BY created_at ASC
+            """,
+            (user_id,),
+        )
+        rows = [dict(row) for row in cursor.fetchall()]
+        if len(rows) >= 10:
+            conn.close()
+            return rows
+
     cursor = conn.execute(
         """
         SELECT priority, urgency_score, energy_required, estimated_minutes,
@@ -80,6 +97,7 @@ def load_interactions(db_path: str) -> list[dict]:
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return rows
+
 
 
 def engineer_features(rows: list[dict]) -> tuple[np.ndarray, np.ndarray]:
@@ -114,7 +132,7 @@ def engineer_features(rows: list[dict]) -> tuple[np.ndarray, np.ndarray]:
     return np.array(X, dtype=np.float64), np.array(y, dtype=np.int32)
 
 
-def train(db_path: str = None, min_samples: int = MIN_SAMPLES_DEFAULT) -> dict:
+def train(db_path: str = None, min_samples: int = MIN_SAMPLES_DEFAULT, user_id: int | None = None) -> dict:
     """
     Main training function.
 
@@ -131,8 +149,9 @@ def train(db_path: str = None, min_samples: int = MIN_SAMPLES_DEFAULT) -> dict:
     if not os.path.exists(db_path):
         return {"status": "error", "message": f"Database not found: {db_path}"}
 
-    rows = load_interactions(db_path)
+    rows = load_interactions(db_path, user_id=user_id)
     total = len(rows)
+
 
     if total < min_samples:
         return {

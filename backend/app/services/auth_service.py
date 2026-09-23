@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 import bcrypt
@@ -33,6 +34,11 @@ def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expire_minutes)
     payload = {"sub": str(user_id), "exp": expire}
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def create_reset_token() -> str:
+    """Generate a cryptographically secure random token for password reset."""
+    return secrets.token_urlsafe(32)
 
 
 def decode_token(token: str) -> int:

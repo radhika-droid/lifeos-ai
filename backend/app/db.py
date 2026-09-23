@@ -30,6 +30,21 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+        # Ensure missing columns on users table if database pre-existed
+        def _migrate(connection):
+            from sqlalchemy import text
+            try:
+                connection.execute(text("ALTER TABLE users ADD COLUMN reset_token VARCHAR"))
+            except Exception:
+                pass
+            try:
+                connection.execute(text("ALTER TABLE users ADD COLUMN reset_token_expires DATETIME"))
+            except Exception:
+                pass
+
+        await conn.run_sync(_migrate)
+
+
     # Seed or fix demo user so login is guaranteed to work
     try:
         from app.models.user import User
@@ -39,6 +54,7 @@ async def init_db():
         from sqlalchemy import select
 
         async with async_session() as session:
+            # Seed or fix demo user
             result = await session.execute(select(User).where(User.email == "demo@lifeos.ai"))
             demo_user = result.scalar_one_or_none()
 
@@ -55,24 +71,41 @@ async def init_db():
                 demo_user.hashed_password = hash_password("password123")
                 await session.commit()
 
+            # Seed user rad@gmail.com
+            rad_res = await session.execute(select(User).where(User.email == "rad@gmail.com"))
+            rad_user = rad_res.scalar_one_or_none()
+            if not rad_user:
+                rad_user = User(
+                    email="rad@gmail.com",
+                    hashed_password=hash_password("radrad"),
+                    name="Radhika",
+                )
+                session.add(rad_user)
+                await session.commit()
+                await session.refresh(rad_user)
+            else:
+                rad_user.hashed_password = hash_password("radrad")
+                await session.commit()
+
             # Seed sample tasks if user has none
-            task_res = await session.execute(select(Task).where(Task.user_id == demo_user.id).limit(1))
+            task_res = await session.execute(select(Task).where(Task.user_id == rad_user.id).limit(1))
             if not task_res.scalar_one_or_none():
                 sample_tasks = [
-                    Task(user_id=demo_user.id, title="Review Q3 Product Roadmap", priority=4, energy_required="high", estimated_minutes=45, status="pending"),
-                    Task(user_id=demo_user.id, title="Clear inbox and reply to team", priority=2, energy_required="low", estimated_minutes=20, status="pending"),
-                    Task(user_id=demo_user.id, title="Prepare presentation deck", priority=5, energy_required="high", estimated_minutes=60, status="in_progress"),
-                    Task(user_id=demo_user.id, title="Review AI recommendations engine", priority=3, energy_required="medium", estimated_minutes=30, status="done"),
+                    Task(user_id=rad_user.id, title="Review Q3 Product Roadmap", priority=4, energy_required="high", estimated_minutes=45, status="pending"),
+                    Task(user_id=rad_user.id, title="Clear inbox and reply to team", priority=2, energy_required="low", estimated_minutes=20, status="pending"),
+                    Task(user_id=rad_user.id, title="Prepare presentation deck", priority=5, energy_required="high", estimated_minutes=60, status="in_progress"),
+                    Task(user_id=rad_user.id, title="Review AI recommendations engine", priority=3, energy_required="medium", estimated_minutes=30, status="done"),
                 ]
                 session.add_all(sample_tasks)
 
                 sample_habits = [
-                    Habit(user_id=demo_user.id, name="Morning Meditation", target_frequency="daily", streak_count=5),
-                    Habit(user_id=demo_user.id, name="Read 20 pages", target_frequency="daily", streak_count=12),
-                    Habit(user_id=demo_user.id, name="Gym Workout", target_frequency="3x/week", streak_count=3),
+                    Habit(user_id=rad_user.id, name="Morning Meditation", target_frequency="daily", streak_count=5),
+                    Habit(user_id=rad_user.id, name="Read 20 pages", target_frequency="daily", streak_count=12),
+                    Habit(user_id=rad_user.id, name="Gym Workout", target_frequency="3x/week", streak_count=3),
                 ]
                 session.add_all(sample_habits)
                 await session.commit()
+
     except Exception as e:
         print(f"Warning: Failed to seed demo data: {e}")
 

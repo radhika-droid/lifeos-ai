@@ -8,31 +8,35 @@ from app.models.habit import Habit, HabitLog
 from app.models.user import User
 from app.models.interaction import Interaction
 from app.services.auth_service import get_current_user
-from app.services.decision_engine import _MODEL, _METADATA
+from app.services.decision_engine import _MODEL, _METADATA, reload_model
+from model.train_model import train as train_ml_model
 
 router = APIRouter()
+
 
 @router.get("/ml-status")
 async def ml_status(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """Return ML model observability metrics."""
-    result = await db.execute(select(func.count(Interaction.id)))
-    total_interactions = result.scalar() or 0
-    
-    # Calculate agreement rate
+    """Return ML model observability metrics for the user."""
+    result = await db.execute(select(func.count(Interaction.id)).where(Interaction.user_id == user.id))
+    user_interactions = result.scalar() or 0
+
+    total_res = await db.execute(select(func.count(Interaction.id)))
+    total_interactions = total_res.scalar() or 0
+
     agree_res = await db.execute(
-        select(func.count(Interaction.id)).where(Interaction.ml_score.is_not(None))
+        select(func.count(Interaction.id)).where(Interaction.ml_score.is_not(None), Interaction.user_id == user.id)
     )
     ml_active_count = agree_res.scalar() or 0
-    
+
     status = "learning"
-    if ml_active_count > 0:
+    if _MODEL and _METADATA:
         status = "active (hybrid mode)"
-    elif total_interactions >= 200:
+    elif user_interactions >= 10:
         status = "ready for training"
-        
+
     ml_weight = 0.0
     if _MODEL and _METADATA:
         auc = _METADATA.get("validation_auc", 0.5)
@@ -41,11 +45,29 @@ async def ml_status(
 
     return {
         "status": status,
+        "user_interactions_logged": user_interactions,
         "total_interactions_logged": total_interactions,
         "ml_weight": round(ml_weight, 2),
         "metadata": _METADATA or {},
     }
 
+
+@router.post("/train-model")
+async def trigger_train_model(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Train or fine-tune the decision engine ML model on user interaction data."""
+    try:
+        res = train_ml_model(min_samples=5, user_id=user.id)
+        reload_model()
+        return {
+            "success": True,
+            "training_result": res,
+            "message": res.get("message", "Model training completed successfully!"),
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 @router.get("/habits")

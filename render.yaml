@@ -1,10 +1,13 @@
 services:
   - type: web
-    name: lifeos-backend
+    name: lifeos-ai
     env: docker
     dockerContext: .
     dockerfilePath: ./Dockerfile
     plan: free
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 10000
+      - key: JWT_SECRET
+        generateValue: true

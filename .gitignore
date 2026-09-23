@@ -3,8 +3,11 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+*.db
+*.sqlite
 data/*.db
 data/*.sqlite
+backend/lifeos.db
 uploads/*
 !uploads/.gitkeep
 !data/.gitkeep
