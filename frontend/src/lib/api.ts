@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:8080');
+const rawBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawBase ? (rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`) : '/api';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -25,7 +26,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('lifeos_token');
       localStorage.removeItem('lifeos_user');
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/signup' && currentPath !== '/forgot-password') {
         window.location.href = '/login';
       }
     }
