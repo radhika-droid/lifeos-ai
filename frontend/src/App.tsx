@@ -5,11 +5,15 @@ import { useEffect, type ReactNode } from 'react';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Habits from './pages/Habits';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
+import Wellness from './pages/Wellness';
+import Notifications from './pages/Notifications';
+import Profile from './pages/Profile';
 import ToastContainer from './components/ui/Toast';
 
 const queryClient = new QueryClient({
@@ -46,12 +50,16 @@ export default function App() {
           {/* Public routes */}
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="habits" element={<Habits />} />
+            <Route path="wellness" element={<Wellness />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="goals" element={<Goals />} />
             <Route path="analytics" element={<Analytics />} />
           </Route>

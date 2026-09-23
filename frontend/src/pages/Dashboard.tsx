@@ -260,6 +260,86 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ── Eisenhower Priority Matrix ───────────── */}
+      <div className="glass-card p-6">
+        <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+          🎯 Eisenhower Priority Matrix
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl bg-danger/10 border border-danger/30 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-danger uppercase tracking-wider">
+              <span>🔥 Do First (Urgent & Important)</span>
+              <span>Q1</span>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              {tasks?.filter(t => t.status !== 'done' && t.priority >= 4).map(t => (
+                <div key={t.id} className="p-2 rounded-lg bg-bg-primary/70 text-text-primary font-medium border border-danger/20 flex items-center justify-between">
+                  <span>{t.title}</span>
+                  <Badge variant="priority" priority={t.priority}>P{t.priority}</Badge>
+                </div>
+              ))}
+              {(!tasks || tasks.filter(t => t.status !== 'done' && t.priority >= 4).length === 0) && (
+                <p className="text-text-muted text-[11px] italic py-2">No critical items in Q1</p>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-accent/10 border border-accent/30 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-accent uppercase tracking-wider">
+              <span>📌 Plan & Schedule (Important)</span>
+              <span>Q2</span>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              {tasks?.filter(t => t.status !== 'done' && t.priority === 3).map(t => (
+                <div key={t.id} className="p-2 rounded-lg bg-bg-primary/70 text-text-primary font-medium border border-accent/20 flex items-center justify-between">
+                  <span>{t.title}</span>
+                  <Badge variant="priority" priority={t.priority}>P{t.priority}</Badge>
+                </div>
+              ))}
+              {(!tasks || tasks.filter(t => t.status !== 'done' && t.priority === 3).length === 0) && (
+                <p className="text-text-muted text-[11px] italic py-2">No planned items in Q2</p>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-warning/10 border border-warning/30 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-warning uppercase tracking-wider">
+              <span>🤝 Delegate / Quick Wins</span>
+              <span>Q3</span>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              {tasks?.filter(t => t.status !== 'done' && t.priority === 2).map(t => (
+                <div key={t.id} className="p-2 rounded-lg bg-bg-primary/70 text-text-primary font-medium border border-warning/20 flex items-center justify-between">
+                  <span>{t.title}</span>
+                  <Badge variant="priority" priority={t.priority}>P{t.priority}</Badge>
+                </div>
+              ))}
+              {(!tasks || tasks.filter(t => t.status !== 'done' && t.priority === 2).length === 0) && (
+                <p className="text-text-muted text-[11px] italic py-2">No quick wins in Q3</p>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-success/10 border border-success/30 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-success uppercase tracking-wider">
+              <span>🧹 Eliminate / Later</span>
+              <span>Q4</span>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              {tasks?.filter(t => t.status !== 'done' && t.priority === 1).map(t => (
+                <div key={t.id} className="p-2 rounded-lg bg-bg-primary/70 text-text-primary font-medium border border-success/20 flex items-center justify-between">
+                  <span>{t.title}</span>
+                  <Badge variant="priority" priority={t.priority}>P{t.priority}</Badge>
+                </div>
+              ))}
+              {(!tasks || tasks.filter(t => t.status !== 'done' && t.priority === 1).length === 0) && (
+                <p className="text-text-muted text-[11px] italic py-2">No low-priority items in Q4</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Recent completed ───────────── */}
       {tasks && tasks.filter((t) => t.status === 'done').length > 0 && (
         <div className="glass-card p-6">
